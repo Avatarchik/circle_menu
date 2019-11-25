@@ -1,26 +1,30 @@
-﻿using UnityEngine;
+﻿using CircleMenu.Utils;
+using UnityEngine;
 
-public class CircleMenuBasic : MonoBehaviour
+namespace CircleMenu
 {
-    [Header("Root")]
-    [SerializeField] private GameObject _root;
-
-    private CanvasGroup _canvasGroup;
-
-    private void Awake()
+    public class CircleMenuBasic : MonoBehaviour
     {
-        _canvasGroup = _root.AddComponent<CanvasGroup>();
-        _canvasGroup.alpha = 0.0f;
-        SetActive(false);
-    }
+        [Header("Root")]
+        [SerializeField] private GameObject _root = default;
 
-    public void SetActive(bool value)
-    {
-        _root.SetActive(value);
-        StopAllCoroutines();
+        private CanvasGroup _canvasGroup;
 
-        StartCoroutine(value
-            ? Utils.FadeIn(_canvasGroup, 1.0f, 0.5f)
-            : Utils.FadeOut(_canvasGroup, 0.0f, 0.5f));
+        private void Awake()
+        {
+            _canvasGroup = _root.AddComponent<CanvasGroup>();
+            _canvasGroup.alpha = 0.0f;
+            SetActive(false);
+        }
+
+        protected void SetActive(bool value)
+        {
+            _root.SetActive(value);
+            StopAllCoroutines();
+
+            StartCoroutine(value
+                ? Fade.In(_canvasGroup, 1.0f, 0.5f)
+                : Fade.Out(_canvasGroup, 0.0f, 0.5f));
+        }
     }
 }

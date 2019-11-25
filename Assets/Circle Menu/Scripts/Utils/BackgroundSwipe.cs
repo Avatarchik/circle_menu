@@ -1,60 +1,61 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class BackgroundSwipe : MonoBehaviour
+namespace CircleMenu.Utils
 {
-    [SerializeField] private Sprite _imgPortrait;
-    [SerializeField] private Sprite _imgLandscape;
-
-    private Image _img;
-
-    private void Start()
+    public class BackgroundSwipe : MonoBehaviour
     {
-        _img = GetComponent<Image>();
-    }
+        [SerializeField] private Sprite _imgPortrait = default;
+        [SerializeField] private Sprite _imgLandscape = default;
 
-    private void OnEnable()
-    {
-        DeviceOrientationManager.OnDeviceOrientationChange += SetOrientation;
-    }
+        private Image _img;
 
-    private void OnDisable()
-    {
-        DeviceOrientationManager.OnDeviceOrientationChange -= SetOrientation;
-    }
-
-    private void SetOrientation(DeviceOrientation orientation)
-    {
-        StopAllCoroutines();
-
-        switch (orientation)
+        private void Start()
         {
-            case DeviceOrientation.Portrait:
-                Portrait();
-                break;
-            case DeviceOrientation.PortraitUpsideDown:
-                Portrait();
-                break;
-            case DeviceOrientation.LandscapeLeft:
-                Landscape();
-                break;
-            case DeviceOrientation.LandscapeRight:
-                Landscape();
-                break;
-            case DeviceOrientation.FaceUp:
-                break;
+            _img = GetComponent<Image>();
         }
-    }
 
-    private void Portrait()
-    {
-        _img.sprite = _imgPortrait;
-    }
+        private void OnEnable()
+        {
+            DeviceOrientationManager.OnDeviceOrientationChange += SetOrientation;
+        }
 
-    private void Landscape()
-    {
-        _img.sprite = _imgLandscape;
+        private void OnDisable()
+        {
+            DeviceOrientationManager.OnDeviceOrientationChange -= SetOrientation;
+        }
+
+        private void SetOrientation(DeviceOrientation orientation)
+        {
+            StopAllCoroutines();
+
+            switch (orientation)
+            {
+                case DeviceOrientation.Portrait:
+                    Portrait();
+                    break;
+                case DeviceOrientation.PortraitUpsideDown:
+                    Portrait();
+                    break;
+                case DeviceOrientation.LandscapeLeft:
+                    Landscape();
+                    break;
+                case DeviceOrientation.LandscapeRight:
+                    Landscape();
+                    break;
+                case DeviceOrientation.FaceUp:
+                    break;
+            }
+        }
+
+        private void Portrait()
+        {
+            _img.sprite = _imgPortrait;
+        }
+
+        private void Landscape()
+        {
+            _img.sprite = _imgLandscape;
+        }
     }
 }

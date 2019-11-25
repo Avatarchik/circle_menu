@@ -2,50 +2,53 @@
 using System.Collections;
 using UnityEngine;
 
-public class DeviceOrientationManager : MonoBehaviour
+namespace CircleMenu.Utils
 {
-    public static event Action<DeviceOrientation> OnDeviceOrientationChange;
-    private static DeviceOrientation _deviceOrientation;
-    private static float CheckDelay = 0.1f;
-
-    private void Start()
+    public class DeviceOrientationManager : MonoBehaviour
     {
-        StartCoroutine(CheckForChange());
-    }
+        public static event Action<DeviceOrientation> OnDeviceOrientationChange;
+        private static DeviceOrientation _deviceOrientation;
+        private const float CHECK_DELAY = 0.1f;
 
-    private static IEnumerator CheckForChange()
-    {
-        _deviceOrientation = Input.deviceOrientation;
-
-        while (true)
+        private void Start()
         {
-            if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft || Input.deviceOrientation == DeviceOrientation.Portrait)
-            {
-                if (_deviceOrientation != Input.deviceOrientation)
-                {
-                    _deviceOrientation = Input.deviceOrientation;
-
-                    if (OnDeviceOrientationChange != null)
-                        OnDeviceOrientationChange(_deviceOrientation);
-                }
-            }
-
-            yield return new WaitForSeconds(CheckDelay);
+            StartCoroutine(CheckForChange());
         }
-    }
+
+        private static IEnumerator CheckForChange()
+        {
+            _deviceOrientation = Input.deviceOrientation;
+
+            while (true)
+            {
+                if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft ||
+                    Input.deviceOrientation == DeviceOrientation.Portrait)
+                {
+                    if (_deviceOrientation != Input.deviceOrientation)
+                    {
+                        _deviceOrientation = Input.deviceOrientation;
+
+                        OnDeviceOrientationChange?.Invoke(_deviceOrientation);
+                    }
+                }
+
+                yield return new WaitForSeconds(CHECK_DELAY);
+            }
+        }
 
 #if UNITY_EDITOR
-    public void Update()
-    {
-        if (Input.GetKeyDown("l"))
+        public void Update()
         {
-            OnDeviceOrientationChange(DeviceOrientation.LandscapeLeft);
-        }
+            if (Input.GetKeyDown("l"))
+            {
+                OnDeviceOrientationChange(DeviceOrientation.LandscapeLeft);
+            }
 
-        if (Input.GetKeyDown("p"))
-        {
-            OnDeviceOrientationChange(DeviceOrientation.Portrait);
+            if (Input.GetKeyDown("p"))
+            {
+                OnDeviceOrientationChange(DeviceOrientation.Portrait);
+            }
         }
-    }
 #endif
+    }
 }

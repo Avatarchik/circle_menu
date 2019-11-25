@@ -1,41 +1,42 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class CircleMenuSpriteSwipe : MonoBehaviour
+namespace CircleMenu
 {
-    [SerializeField] private Image _iconShow;
-    [SerializeField] private Image _iconHide;
-
-    private bool _isShow = false;
-
-    private void Start()
+    public class CircleMenuSpriteSwipe : MonoBehaviour
     {
-        var button = GetComponent<Button>();
+        [SerializeField] private Image _iconShow = default;
+        [SerializeField] private Image _iconHide = default;
 
-        _iconHide.gameObject.SetActive(false);
-        _iconShow.gameObject.SetActive(true);
+        private bool _isShow = false;
 
-        if (button != null)
+        private void Start()
         {
-            button.onClick.AddListener(() =>
+            var button = GetComponent<Button>();
+
+            _iconHide.gameObject.SetActive(false);
+            _iconShow.gameObject.SetActive(true);
+
+            if (button != null)
             {
-                if (_isShow)
+                button.onClick.AddListener(() =>
                 {
-                    _isShow = false;
+                    if (_isShow)
+                    {
+                        _isShow = false;
 
-                    _iconHide.gameObject.SetActive(false);
-                    _iconShow.gameObject.SetActive(true);
-                }
-                else
-                {
-                    _isShow = true;
+                        _iconHide.gameObject.SetActive(false);
+                        _iconShow.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        _isShow = true;
 
-                    _iconShow.gameObject.SetActive(false);
-                    _iconHide.gameObject.SetActive(true);
-                }
-            });
+                        _iconShow.gameObject.SetActive(false);
+                        _iconHide.gameObject.SetActive(true);
+                    }
+                });
+            }
         }
     }
 }
