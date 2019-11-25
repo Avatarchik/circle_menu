@@ -20,7 +20,7 @@ Circle Menu is a C# script used in Unity to quickly and easily create GUI circul
 
 
 ## Compatibility
-Circle menu is written in Unity 2018.2.12f1. Also works with versions since 5.x.x, 2017.x.x (need to rebuild prefabs). (iOS, Android, PC, WebGL)
+Circle menu is written in Unity 2019.3.0bf10. Also works with versions since 5.x.x, 201x.x.x (need to rebuild prefabs). (iOS, Android, PC, WebGL)
 
 ## License
 This project is licensed under the MIT - see the [LICENSE.md](https://github.com/dworkinnn/circle_menu/blob/master/LICENSE) file for details
