@@ -5,12 +5,27 @@ namespace CircleMenu.Utils
 {
     public class RadialLayout : LayoutGroup
     {
-        [Header("Editor settings")]
-        [SerializeField] private float _radius;
+        #region FIELDS
 
-        [Range(0f, 360f)] [SerializeField] private float _minAngle = default;
-        [Range(0f, 360f)] [SerializeField] private float _maxAngle = default;
-        [Range(-360f, 360f)] [SerializeField] private float _startAngle = default;
+        [Header("Editor settings")]
+        [SerializeField]
+        private float _radius = default;
+
+        [Range(0f, 360f)]
+        [SerializeField]
+        private float _minAngle = default;
+
+        [Range(0f, 360f)]
+        [SerializeField]
+        private float _maxAngle = default;
+
+        [Range(-360f, 360f)]
+        [SerializeField]
+        private float _startAngle = default;
+
+        #endregion
+
+        #region PROPERTIES
 
         public float Angle
         {
@@ -23,6 +38,10 @@ namespace CircleMenu.Utils
             get => _radius;
             private set => _radius = value;
         }
+
+        #endregion
+
+        #region UNITY_METHODS
 
         public override void SetLayoutHorizontal()
         {
@@ -41,6 +60,18 @@ namespace CircleMenu.Utils
         {
             CalculateRadial();
         }
+//
+// #if UNITY_EDITOR
+//         protected override void OnValidate()
+//         {
+//             base.OnValidate();
+//             CalculateRadial();
+//         }
+// #endif
+
+        #endregion
+
+        #region PRIVATE_METHODS
 
         private void CalculateRadial()
         {
@@ -69,12 +100,6 @@ namespace CircleMenu.Utils
             }
         }
 
-#if UNITY_EDITOR
-        protected override void OnValidate()
-        {
-            base.OnValidate();
-            CalculateRadial();
-        }
-#endif
+        #endregion
     }
 }

@@ -5,6 +5,8 @@ namespace CircleMenu.Utils
 {
     public static class Fade
     {
+        #region PUBLIC_METHODS
+
         public static IEnumerator In(CanvasGroup group, float alpha, float duration)
         {
             var time = 0.0f;
@@ -32,5 +34,7 @@ namespace CircleMenu.Utils
 
             group.alpha = alpha;
         }
+
+        #endregion
     }
 }

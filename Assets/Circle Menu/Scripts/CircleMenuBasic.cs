@@ -5,10 +5,17 @@ namespace CircleMenu
 {
     public class CircleMenuBasic : MonoBehaviour
     {
+        #region FIELDS
+
         [Header("Root")]
-        [SerializeField] private GameObject _root = default;
+        [SerializeField]
+        private GameObject _root = default;
 
         private CanvasGroup _canvasGroup;
+
+        #endregion
+
+        #region UNITY_METHODS
 
         private void Awake()
         {
@@ -16,6 +23,10 @@ namespace CircleMenu
             _canvasGroup.alpha = 0.0f;
             SetActive(false);
         }
+
+        #endregion
+
+        #region PUBLIC_METHODS
 
         protected void SetActive(bool value)
         {
@@ -26,5 +37,7 @@ namespace CircleMenu
                 ? Fade.In(_canvasGroup, 1.0f, 0.5f)
                 : Fade.Out(_canvasGroup, 0.0f, 0.5f));
         }
+
+        #endregion
     }
 }

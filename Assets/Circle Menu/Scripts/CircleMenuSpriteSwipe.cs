@@ -5,10 +5,19 @@ namespace CircleMenu
 {
     public class CircleMenuSpriteSwipe : MonoBehaviour
     {
-        [SerializeField] private Image _iconShow = default;
-        [SerializeField] private Image _iconHide = default;
+        #region FIELDS
+
+        [SerializeField]
+        private Image _iconShow = default;
+
+        [SerializeField]
+        private Image _iconHide = default;
 
         private bool _isShow = false;
+
+        #endregion
+
+        #region UNITY_METHODS
 
         private void Start()
         {
@@ -38,5 +47,7 @@ namespace CircleMenu
                 });
             }
         }
+
+        #endregion
     }
 }

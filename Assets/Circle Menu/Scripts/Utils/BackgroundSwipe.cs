@@ -5,10 +5,19 @@ namespace CircleMenu.Utils
 {
     public class BackgroundSwipe : MonoBehaviour
     {
-        [SerializeField] private Sprite _imgPortrait = default;
-        [SerializeField] private Sprite _imgLandscape = default;
+        #region FIELDS
+
+        [SerializeField]
+        private Sprite _imgPortrait = default;
+
+        [SerializeField]
+        private Sprite _imgLandscape = default;
 
         private Image _img;
+
+        #endregion
+
+        #region UNITY_METHODS
 
         private void Start()
         {
@@ -24,6 +33,10 @@ namespace CircleMenu.Utils
         {
             DeviceOrientationManager.OnDeviceOrientationChange -= SetOrientation;
         }
+
+        #endregion
+
+        #region PRIVATE_METHODS
 
         private void SetOrientation(DeviceOrientation orientation)
         {
@@ -57,5 +70,7 @@ namespace CircleMenu.Utils
         {
             _img.sprite = _imgLandscape;
         }
+
+        #endregion
     }
 }

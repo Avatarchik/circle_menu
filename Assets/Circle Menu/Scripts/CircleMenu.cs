@@ -2,24 +2,37 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System.Collections;
 using System.Collections.Generic;
 using CircleMenu.Utils;
-#if UNITY_EDITOR
-using UnityEditor;
-
-#endif
 
 namespace CircleMenu
 {
     public class CircleMenu : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        [SerializeField] [Range(0f, 360f)] private float _angle = default;
-        [SerializeField] [Range(-360f, 360f)] private float _angleOffset = 45.0f;
-        [SerializeField] [Range(0.01f, 1f)] private float _spring = 0.3f;
-        [SerializeField] [Range(1f, 2f)] private float _selectedScale = 1.2f;
-        [SerializeField] [Range(0.1f, 0.5f)] private float _sensitivity = 0.25f;
-        [SerializeField] private List<GameObject> _items = default;
+        #region FIELDS
+
+        [SerializeField]
+        [Range(0f, 360f)]
+        private float _angle = default;
+
+        [SerializeField]
+        [Range(-360f, 360f)]
+        private float _angleOffset = 45.0f;
+
+        [SerializeField]
+        [Range(0.01f, 1f)]
+        private float _spring = 0.3f;
+
+        [SerializeField]
+        [Range(1f, 2f)]
+        private float _selectedScale = 1.2f;
+
+        [SerializeField]
+        [Range(0.1f, 0.5f)]
+        private float _sensitivity = 0.25f;
+
+        [SerializeField]
+        private List<GameObject> _items = default;
 
         public event Action<EMenu> OnClick;
 
@@ -28,6 +41,20 @@ namespace CircleMenu
 
         private int _inner;
         private int _count;
+
+        private Vector2 _dragStart;
+        private Vector2 _dragEnd;
+        private Vector2 BasePos => transform.position;
+
+        private float _minAngle = 0.03f;
+        private float _radius = 100.0f;
+        private float _startAngle;
+        private float _endAngle;
+        private bool _isDraging;
+
+        #endregion
+
+        #region PROPERTIES
 
         public int SelectedIndex
         {
@@ -45,16 +72,7 @@ namespace CircleMenu
             }
         }
 
-        private Vector2 _dragStart;
-        private Vector2 _dragEnd;
-        private Vector2 BasePos => transform.position;
-
-        private float _minAngle = 0.03f;
-        private float _radius = 100.0f;
-        private float _startAngle;
-        private float _endAngle;
-
-        private float GetAngle(Vector2 p1, Vector2 p2)
+        private static float GetAngle(Vector2 p1, Vector2 p2)
         {
             return -Mathf.Atan2(p1.y - p2.y, p1.x - p2.x);
         }
@@ -88,8 +106,6 @@ namespace CircleMenu
             }
         }
 
-        private bool _isDraging;
-
         private GameObject SelectedItem
         {
             get
@@ -100,6 +116,10 @@ namespace CircleMenu
                 return _items[index];
             }
         }
+
+        #endregion
+
+        #region UNITY_METHODS
 
         private void Awake()
         {
@@ -112,11 +132,6 @@ namespace CircleMenu
         private void Start()
         {
             UpdatePos(_angle);
-        }
-
-        private void OnOnClick(EMenu menu)
-        {
-            OnClick?.Invoke(menu);
         }
 
         private void Update()
@@ -174,6 +189,85 @@ namespace CircleMenu
             }
         }
 
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            _isDraging = true;
+
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(_canvas.GetComponent<RectTransform>(),
+                eventData.position,
+                _canvas.worldCamera, out var worldPoint);
+
+            _dragStart = _dragEnd = worldPoint;
+            _startAngle = GetAngle(BasePos, _dragStart);
+            _endAngle = GetAngle(BasePos, _dragEnd);
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(_canvas.GetComponent<RectTransform>(),
+                eventData.position,
+                _canvas.worldCamera, out var worldPoint);
+
+            _dragEnd = worldPoint;
+            _startAngle = GetAngle(BasePos, _dragStart);
+            _endAngle = GetAngle(BasePos, _dragEnd);
+            UpdatePos(Angle + DiffAngleDeg);
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            _isDraging = false;
+
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(_canvas.GetComponent<RectTransform>(),
+                eventData.position,
+                _canvas.worldCamera, out var worldPoint);
+
+            _dragEnd = worldPoint;
+            _startAngle = GetAngle(BasePos, _dragStart);
+            _endAngle = GetAngle(BasePos, _dragEnd);
+
+            _angle += DiffAngleDeg;
+            while (_angle > 360f)
+            {
+                _angle -= 360f;
+            }
+
+            while (_angle < 0f)
+            {
+                _angle += 360f;
+            }
+
+            UpdatePos(_angle);
+
+            var region = 360f / (_count * 2);
+            var indexCnt = (int) (_angle / region);
+            var nearIndex = indexCnt / 2 + ((indexCnt % 2) == 0 ? 0 : 1);
+            nearIndex = nearIndex % _count;
+
+            _inner = nearIndex;
+
+            if (_startAngle > _endAngle)
+            {
+                var result = _startAngle - _endAngle;
+                if (result > _sensitivity && result < 1.0f)
+                {
+                    _inner--;
+                }
+            }
+            else if (_startAngle < _endAngle)
+            {
+                var result = _endAngle - _startAngle;
+                if (result > _sensitivity && result < 1.0f)
+                {
+                    _inner++;
+                }
+            }
+        }
+
+        #endregion
+
+        #region PUBLIC_EVENTS
+
         public void Focus(int index)
         {
             if (index >= _count)
@@ -214,31 +308,9 @@ namespace CircleMenu
             }
         }
 
-        private void OnSelect(GameObject obj)
-        {
-            if (obj == null) return;
+        #endregion
 
-            obj.transform.localScale = Vector3.one * _selectedScale;
-            foreach (var btn in obj.GetComponentsInChildren<Button>(true))
-            {
-                btn.interactable = true;
-                var elmnt = btn.GetComponent<CircleMenuElmnt>();
-                elmnt.SetColor(true);
-            }
-        }
-
-        private void OnInSelect(GameObject obj)
-        {
-            if (obj == null) return;
-
-            obj.transform.localScale = Vector3.one;
-            foreach (var btn in obj.GetComponentsInChildren<Button>(true))
-            {
-                btn.interactable = false;
-                var elmnt = btn.GetComponent<CircleMenuElmnt>();
-                elmnt.SetColor(false);
-            }
-        }
+        #region PRIVATE_METHODS
 
         private void UpdatePos(float diffAngle)
         {
@@ -271,84 +343,39 @@ namespace CircleMenu
             }
         }
 
-        #region INTERFACE
+        #endregion
 
-        public void OnBeginDrag(PointerEventData eventData)
+        #region PLAYER_EVENTS
+
+        private void OnSelect(GameObject obj)
         {
-            _isDraging = true;
+            if (obj == null) return;
 
-            Vector3 worldPoint;
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(_canvas.GetComponent<RectTransform>(),
-                eventData.position,
-                _canvas.worldCamera, out worldPoint);
-
-            _dragStart = _dragEnd = worldPoint;
-            _startAngle = GetAngle(BasePos, _dragStart);
-            _endAngle = GetAngle(BasePos, _dragEnd);
+            obj.transform.localScale = Vector3.one * _selectedScale;
+            foreach (var btn in obj.GetComponentsInChildren<Button>(true))
+            {
+                btn.interactable = true;
+                var elmnt = btn.GetComponent<CircleMenuElmnt>();
+                elmnt.SetColor(true);
+            }
         }
 
-        public void OnDrag(PointerEventData eventData)
+        private static void OnInSelect(GameObject obj)
         {
-            Vector3 worldPoint;
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(_canvas.GetComponent<RectTransform>(),
-                eventData.position,
-                _canvas.worldCamera, out worldPoint);
+            if (obj == null) return;
 
-            _dragEnd = worldPoint;
-            _startAngle = GetAngle(BasePos, _dragStart);
-            _endAngle = GetAngle(BasePos, _dragEnd);
-            UpdatePos(Angle + DiffAngleDeg);
+            obj.transform.localScale = Vector3.one;
+            foreach (var btn in obj.GetComponentsInChildren<Button>(true))
+            {
+                btn.interactable = false;
+                var elmnt = btn.GetComponent<CircleMenuElmnt>();
+                elmnt.SetColor(false);
+            }
         }
 
-        public void OnEndDrag(PointerEventData eventData)
+        private void OnOnClick(EMenu menu)
         {
-            _isDraging = false;
-
-            Vector3 worldPoint;
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(_canvas.GetComponent<RectTransform>(),
-                eventData.position,
-                _canvas.worldCamera, out worldPoint);
-
-            _dragEnd = worldPoint;
-            _startAngle = GetAngle(BasePos, _dragStart);
-            _endAngle = GetAngle(BasePos, _dragEnd);
-
-            _angle = _angle + DiffAngleDeg;
-            while (_angle > 360f)
-            {
-                _angle -= 360f;
-            }
-
-            while (_angle < 0f)
-            {
-                _angle += 360f;
-            }
-
-            UpdatePos(_angle);
-
-            var region = 360f / (_count * 2);
-            var indexCnt = (int) (_angle / region);
-            var nearIndex = indexCnt / 2 + ((indexCnt % 2) == 0 ? 0 : 1);
-            nearIndex = nearIndex % _count;
-
-            _inner = nearIndex;
-
-            if (_startAngle > _endAngle)
-            {
-                var result = _startAngle - _endAngle;
-                if (result > _sensitivity && result < 1.0f)
-                {
-                    _inner--;
-                }
-            }
-            else if (_startAngle < _endAngle)
-            {
-                var result = _endAngle - _startAngle;
-                if (result > _sensitivity && result < 1.0f)
-                {
-                    _inner++;
-                }
-            }
+            OnClick?.Invoke(menu);
         }
 
         #endregion
